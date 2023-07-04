@@ -35,7 +35,22 @@
 }
 .delete-icon {
   cursor: pointer;
+  width: 30px;
+  height: 25px;
 }
 .add-to-cart-icon {
   cursor: pointer;
+  width: 30px;
+  height: 25px;
+}
+
+.added-icon {
+  width: 30px;
+  height: 25px;
+}
+
+.save-icon {
+  cursor: pointer;
+  width: 30px;
+  height: 20px;
 }

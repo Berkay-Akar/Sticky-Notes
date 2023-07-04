@@ -11,6 +11,10 @@ export const CartContext = React.createContext();
 
 function App() {
   const [notes, setNotes] = useState([]);
+  const [selectedColor, setSelectedColor] = useState("");
+  useEffect(() => {
+    fetchNotes();
+  }, []);
   const fetchNotes = async () => {
     try {
       const response = await axios.get("http://localhost:3001/notes");
@@ -22,43 +26,83 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const addToCart = (note) => {
-    setCartItems([...cartItems, note]);
+  const addToCart = async (note) => {
+    try {
+      await axios.post(`http://localhost:3001/notes/${note.id}`);
+      setCartItems([...cartItems, note]);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const removeFromCart = (noteId) => {
-    const updatedCartItems = cartItems.filter((item) => item.id !== noteId);
-    setCartItems(updatedCartItems);
+  const removeFromCart = async (noteId) => {
+    try {
+      await axios.delete(`http://localhost:3001/cart/${noteId}`);
+      const updatedCartItems = cartItems.filter((item) => item.id !== noteId);
+      setCartItems(updatedCartItems);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const openCartPage = () => {
+  const openCartPage = async () => {
     setIsCartOpen(true);
+    await axios.get(`http://localhost:3001/cart/`);
   };
 
-  const closeCartPage = () => {
+  const closeCartPage = async () => {
     setIsCartOpen(false);
+    await axios.get(`http://localhost:3001/notes/`);
   };
 
-  const addNote = (color) => {
-    const tempNotes = [...notes];
+  const addNote = async (color, note, id) => {
+    try {
+      console.log(id);
+      console.log(note);
+      console.log(notes);
+      if (id) {
+        console.log("İF");
+        axios.put(`http://localhost:3001/notes/${id}`, {
+          description: note,
+          id: id,
+        });
+      } else {
+        console.log("ELSE");
+        const dummyNoteData = await axios.post("http://localhost:3001/notes", {
+          description: note,
+          color: color,
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-    tempNotes.push({
-      id: Date.now() + "" + Math.floor(Math.random() * 78),
-      text: "",
-      time: Date.now(),
-      color,
-    });
+  const createDummy = (color, id) => {
+    const tempNotes = [
+      ...notes,
+      {
+        id,
+        text: "",
+        time: Date.now(),
+        color,
+      },
+    ];
+    setSelectedColor(color);
     setNotes(tempNotes);
   };
 
-  const deleteNote = (id) => {
-    const tempNotes = [...notes];
-
-    const index = tempNotes.findIndex((item) => item.id === id);
-    if (index < 0) return;
-
-    tempNotes.splice(index, 1);
-    setNotes(tempNotes);
+  const deleteNote = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3001/notes/${id}`);
+      const tempNotes = [...notes];
+      const index = tempNotes.findIndex((item) => item.id === id);
+      if (index < 0) return;
+      tempNotes.splice(index, 1);
+      setNotes(tempNotes);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const updateText = (text, id) => {
@@ -84,6 +128,9 @@ function App() {
           removeFromCart,
           openCartPage,
           closeCartPage,
+          addNote,
+          createDummy,
+          selectedColor,
         }}
       >
         <Sidebar addNote={addNote} openCartPage={openCartPage} />

@@ -1,47 +1,27 @@
-import React, { useContext } from "react";
-import deleteIcon from "../../assets/delete.svg";
+import React, { useContext, useEffect, useState } from "react";
 import "./Note.css";
 import { CartContext } from "../../App";
-import { BsFillCartCheckFill } from "react-icons/bs";
+import { BsFillBagCheckFill } from "react-icons/bs";
 import { MdDeleteForever } from "react-icons/md";
+import { BsFillCheckCircleFill } from "react-icons/bs";
+import { BsFillArrowRightSquareFill } from "react-icons/bs";
+import moment from "moment";
 
 let timer = 500;
 let timeout;
 
 function Note(props) {
-  const { addToCart } = useContext(CartContext);
+  const [check, setCheck] = useState(false);
+  const { addToCart, addNote, selectedColor } = useContext(CartContext);
+  const [input, setInput] = useState("");
 
-  const formatDate = (value) => {
-    if (!value) return "";
+  useEffect(() => {
+    setInput(props.note.description);
+  }, []);
 
-    const date = new Date(value);
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "March",
-      "April",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sept",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-
-    let hrs = date.getHours();
-    let amPm = hrs >= 12 ? "PM" : "AM";
-    hrs = hrs ? hrs : "12";
-    hrs = hrs > 12 ? (hrs = 24 - hrs) : hrs;
-
-    let min = date.getMinutes();
-    min = min < 10 ? "0" + min : min;
-
-    let day = date.getDate();
-    const month = monthNames[date.getMonth()];
-
-    return `${hrs}:${min} ${amPm} ${day} ${month}`;
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setInput(event.target.value);
   };
 
   const debounce = (func) => {
@@ -55,27 +35,42 @@ function Note(props) {
 
   const handleAddToCart = () => {
     addToCart(props.note);
+    setCheck(!check);
+  };
+
+  const saveText = async () => {
+    addNote(selectedColor, input, props.note.id);
   };
 
   return (
     <div className="note" style={{ backgroundColor: props.note.color }}>
       <textarea
         className="note_text"
-        defaultValue={props.note.text}
-        onChange={(event) => updateText(event.target.value, props.note.id)}
+        value={input}
+        onChange={(event) => setInput(event.target.value)}
+        placeholder="Enter your note here..."
+        spellCheck="false"
       />
       <div className="note_footer">
-        <p>{formatDate(props.note.time)}</p>
+        <p>{moment(props.note.createdAt).format("MM Do YY, h:mm:ss a")}</p>
         <MdDeleteForever
           onClick={() => props.deleteNote(props.note.id)}
+          onSubmit={handleSubmit}
           className="delete-icon"
         />
-        <BsFillCartCheckFill
-          onClick={handleAddToCart}
-          className="add-to-cart-icon"
-        >
-          Add to Cart
-        </BsFillCartCheckFill>
+
+        {check ? (
+          <BsFillCheckCircleFill className="added-icon" />
+        ) : (
+          <BsFillBagCheckFill
+            onClick={handleAddToCart}
+            className="add-to-cart-icon"
+          >
+            Add to Cart
+          </BsFillBagCheckFill>
+        )}
+
+        <BsFillArrowRightSquareFill onClick={saveText} className="save-icon" />
       </div>
     </div>
   );

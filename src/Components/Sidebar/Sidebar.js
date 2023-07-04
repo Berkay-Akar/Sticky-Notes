@@ -1,15 +1,14 @@
-import React, { useState } from "react";
-
-import plusIcon from "../../assets/plus.png";
+import React, { useState, useContext } from "react";
 import { AiFillPlusCircle } from "react-icons/ai";
 
+import { CartContext } from "../../App";
 import "./Sidebar.css";
 
 function Sidebar(props) {
+  const { createDummy } = useContext(CartContext);
   const colors = ["#fe9b72", "#fec971", " #00d4fe", "#b693fd", "#e4ee91"];
 
   const [listOpen, setListOpen] = useState(false);
-
   return (
     <div className="sidebar">
       <AiFillPlusCircle
@@ -23,7 +22,7 @@ function Sidebar(props) {
             key={index}
             className="sidebar_list_item"
             style={{ backgroundColor: item }}
-            onClick={() => props.addNote(item)}
+            onClick={() => createDummy(item)}
           />
         ))}
       </ul>

@@ -3,12 +3,18 @@ import { BsArrowLeft } from "react-icons/bs";
 import Note from "../Note/Note";
 import "./Cart.css";
 import { CartContext } from "../../App";
+import axios from "axios";
 
 function Cart() {
   const { cartItems, removeFromCart, closeCartPage } = useContext(CartContext);
 
-  const handleRemoveItem = (noteId) => {
-    removeFromCart(noteId);
+  const handleRemoveItem = async (noteId) => {
+    try {
+      await axios.delete(`http://localhost:3001/cart/${noteId}`);
+      removeFromCart(noteId);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleGoBack = () => {

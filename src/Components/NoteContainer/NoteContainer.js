@@ -35,7 +35,6 @@ function NoteContainer(props) {
               key={item.id}
               note={item}
               deleteNote={props.deleteNote}
-              updateText={props.updateText}
               addToCart={props.addToCart}
             />
           ))

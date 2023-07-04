@@ -66,3 +66,11 @@
   display: flex;
   justify-content: space-between;
 }
+
+.cart-icon {
+  width: 75px;
+  height: 33px;
+}
+.cart-note-item > .note-footer > .add-to-cart-icon {
+  display: none;
+}
