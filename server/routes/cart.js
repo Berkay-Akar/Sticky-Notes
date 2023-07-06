@@ -3,7 +3,9 @@ const router = express.Router();
 const db = require("../db");
 
 router.get("/cart", (req, res) => {
-  db.query("SELECT * FROM notes WHERE isCarted = 1 b RETURNING *")
+  db.query(
+    "SELECT c.cart_id, n.id, n.description, n.color FROM cart c LEFT JOIN notes n ON c.note_id = n.id WHERE c.cart_id = 1"
+  )
     .then((result) => {
       const carts = result.rows;
       res.json(carts);
@@ -14,32 +16,36 @@ router.get("/cart", (req, res) => {
     });
 });
 
-// router.route("/cart/:id").post(async (req, res) => {
-//   const { description } = req.body;
-//   db.query(
-//     "INSERT INTO cart (description) WHERE id=$1 VALUES ($1) RETURNING *",
-//     [description]
-//   )
-//     .then((result) => {
-//       console.log(result.rows);
-//       const newCart = result.rows[0];
-//       res.json(newCart);
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//       res.status(500).json({ message: "Server Error (route.post)" });
-//     });
-// });
+router.route("/cart/:noteId").post(async (req, res) => {
+  const { noteId } = req.params;
+  db.query(
+    "INSERT INTO cart (note_id) " +
+      "SELECT id " +
+      "FROM notes WHERE id = $1 " +
+      "RETURNING *",
+    [noteId]
+  )
+    .then((result) => {
+      console.log("Added To Cart");
+      console.log(result.rows);
+      const newCart = result.rows[0];
+      res.json(newCart);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: "Server Error (route.post)" });
+    });
+});
 
-router.route("/cart/:id").delete((req, res) => {
+router.delete("/cart/:id", (req, res) => {
   const { id } = req.params;
-  db.query("DELETE FROM cart WHERE id = $1", [id])
+  db.query("DELETE FROM cart WHERE note_id = $1", [id])
     .then(() => {
       res.json("Note Deleted Successfully!");
     })
     .catch((err) => {
       console.log(err);
-      res.status(500).json({ message: "Server Error Delete Todo" });
+      res.status(500).json({ message: "Server Error Delete Note" });
     });
 });
 

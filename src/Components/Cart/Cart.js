@@ -1,12 +1,30 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { BsArrowLeft } from "react-icons/bs";
 import Note from "../Note/Note";
 import "./Cart.css";
 import { CartContext } from "../../App";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
-  const { cartItems, removeFromCart, closeCartPage } = useContext(CartContext);
+  const navigate = useNavigate();
+  console.log("cart");
+  const { removeFromCart, closeCartPage, setCartItems, cartItems } =
+    useContext(CartContext);
+  const [cartData, setCartData] = useState([]);
+
+  useEffect(() => {
+    fetchCartData();
+  }, []);
+
+  const fetchCartData = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/cart");
+      setCartItems(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleRemoveItem = async (noteId) => {
     try {
@@ -19,6 +37,7 @@ function Cart() {
 
   const handleGoBack = () => {
     closeCartPage();
+    navigate("/notes");
   };
 
   return (
@@ -30,7 +49,11 @@ function Cart() {
       <div className="cart-notes">
         {cartItems.map((note) => (
           <div className="cart-note-item" key={note.id}>
-            <Note note={note} deleteNote={() => handleRemoveItem(note.id)} />
+            <Note
+              isIconNotVisible={true}
+              note={note}
+              deleteNote={() => handleRemoveItem(note.id)}
+            />
           </div>
         ))}
       </div>

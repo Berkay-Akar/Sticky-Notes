@@ -4,8 +4,10 @@ import { FiShoppingCart } from "react-icons/fi";
 import Note from "../Note/Note";
 
 import "./NoteContainer.css";
+import { useNavigate } from "react-router-dom";
 
 function NoteContainer(props) {
+  const navigate = useNavigate();
   const reverArray = (arr) => {
     const array = [];
 
@@ -20,6 +22,7 @@ function NoteContainer(props) {
 
   const handleOpenCartPage = () => {
     props.openCartPage();
+    navigate("/cart");
   };
 
   return (

@@ -6,6 +6,7 @@ import Cart from "./Components/Cart/Cart";
 import axios from "axios";
 
 import "./App.css";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 export const CartContext = React.createContext();
 
@@ -28,17 +29,25 @@ function App() {
 
   const addToCart = async (note) => {
     try {
-      await axios.post(`http://localhost:3001/notes/${note.id}`);
-      setCartItems([...cartItems, note]);
+      console.log(note);
+      const { id, description, color } = note;
+      await axios.post(`http://localhost:3001/cart/${id}`, {
+        id,
+        description,
+        color,
+      });
     } catch (err) {
       console.log(err);
     }
   };
 
-  const removeFromCart = async (noteId) => {
+  const removeFromCart = async (note) => {
     try {
-      await axios.delete(`http://localhost:3001/cart/${noteId}`);
-      const updatedCartItems = cartItems.filter((item) => item.id !== noteId);
+      const { id } = note;
+      await axios.delete(`http://localhost:3001/cart/${id}`, {
+        id,
+      });
+      const updatedCartItems = cartItems.filter((item) => item.id !== note.id);
       setCartItems(updatedCartItems);
     } catch (err) {
       console.log(err);
@@ -68,21 +77,24 @@ function App() {
         });
       } else {
         console.log("ELSE");
-        const dummyNoteData = await axios.post("http://localhost:3001/notes", {
+        const backNote = await axios.post("http://localhost:3001/notes", {
           description: note,
           color: color,
         });
+        console.log(backNote.data.id);
+        const tempNotes = notes;
+        tempNotes.pop();
+        setNotes([...tempNotes, backNote.data]);
       }
     } catch (err) {
       console.log(err);
     }
   };
 
-  const createDummy = (color, id) => {
+  const createDummy = (color) => {
     const tempNotes = [
       ...notes,
       {
-        id,
         text: "",
         time: Date.now(),
         color,
@@ -118,36 +130,44 @@ function App() {
   useEffect(() => {
     localStorage.setItem("notes-app", JSON.stringify(notes));
   }, [notes]);
+  console.log(isCartOpen);
 
   return (
-    <div className="App">
-      <CartContext.Provider
-        value={{
-          cartItems,
-          addToCart,
-          removeFromCart,
-          openCartPage,
-          closeCartPage,
-          addNote,
-          createDummy,
-          selectedColor,
-        }}
-      >
-        <Sidebar addNote={addNote} openCartPage={openCartPage} />
-        {isCartOpen ? (
-          <Cart />
-        ) : (
-          <div>
-            <NoteContainer
-              notes={notes}
-              deleteNote={deleteNote}
-              updateText={updateText}
-              openCartPage={openCartPage}
+    <BrowserRouter>
+      <div className="App">
+        <CartContext.Provider
+          value={{
+            cartItems,
+            addToCart,
+            removeFromCart,
+            openCartPage,
+            closeCartPage,
+            addNote,
+            createDummy,
+            selectedColor,
+            deleteNote,
+            setCartItems,
+          }}
+        >
+          <Sidebar addNote={addNote} openCartPage={openCartPage} />
+          <Routes>
+            <Route
+              path="/notes"
+              element={
+                <NoteContainer
+                  notes={notes}
+                  deleteNote={deleteNote}
+                  updateText={updateText}
+                  openCartPage={openCartPage}
+                />
+              }
             />
-          </div>
-        )}
-      </CartContext.Provider>
-    </div>
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/*" element={<Navigate to="/" />} />
+          </Routes>
+        </CartContext.Provider>
+      </div>
+    </BrowserRouter>
   );
 }
 

@@ -51,6 +51,7 @@ router.route("/notes/:id").delete((req, res) => {
   db.query("DELETE FROM notes WHERE id = $1", [id])
     .then((result) => {
       console.log(result.rows);
+      console.log("Note Deleted!!!!!");
       res.json("Note Deleted Successfully");
     })
     .catch((err) => {

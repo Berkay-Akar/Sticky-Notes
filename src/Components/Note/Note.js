@@ -12,7 +12,14 @@ let timeout;
 
 function Note(props) {
   const [check, setCheck] = useState(false);
-  const { addToCart, addNote, selectedColor } = useContext(CartContext);
+  const {
+    cartItems,
+    addToCart,
+    deleteNote,
+    removeFromCart,
+    addNote,
+    selectedColor,
+  } = useContext(CartContext);
   const [input, setInput] = useState("");
 
   useEffect(() => {
@@ -42,6 +49,22 @@ function Note(props) {
     addNote(selectedColor, input, props.note.id);
   };
 
+  const handleDelete = () => {
+    console.log("CART ITEMS: ", cartItems);
+    if (cartItems.find((item) => item.id === props.note.id)) {
+      removeFromCart(props.note);
+      console.log("İİİFFFFFFFFFFF");
+      console.log(props.note);
+      console.log(props.note.id);
+    } else {
+      deleteNote(props.note.id);
+      console.log("EEEEEEEELSEEEEE");
+      console.log(props.note);
+      console.log(props.note.id);
+      console.log(cartItems.map((item) => item.data));
+    }
+  };
+
   return (
     <div className="note" style={{ backgroundColor: props.note.color }}>
       <textarea
@@ -52,25 +75,30 @@ function Note(props) {
         spellCheck="false"
       />
       <div className="note_footer">
-        <p>{moment(props.note.createdAt).format("MM Do YY, h:mm:ss a")}</p>
+        <p>{moment(props.note.createdat).format("DD.MM.YY - HH:mm:ss")}</p>
         <MdDeleteForever
-          onClick={() => props.deleteNote(props.note.id)}
-          onSubmit={handleSubmit}
+          onClick={handleDelete}
+          //onSubmit={handleSubmit}
           className="delete-icon"
         />
-
-        {check ? (
-          <BsFillCheckCircleFill className="added-icon" />
-        ) : (
-          <BsFillBagCheckFill
-            onClick={handleAddToCart}
-            className="add-to-cart-icon"
-          >
-            Add to Cart
-          </BsFillBagCheckFill>
+        {!props.isIconNotVisible && (
+          <>
+            {check ? (
+              <BsFillCheckCircleFill className="added-icon" />
+            ) : (
+              <BsFillBagCheckFill
+                onClick={handleAddToCart}
+                className="add-to-cart-icon"
+              >
+                Add to Cart
+              </BsFillBagCheckFill>
+            )}
+            <BsFillArrowRightSquareFill
+              onClick={saveText}
+              className="save-icon"
+            />
+          </>
         )}
-
-        <BsFillArrowRightSquareFill onClick={saveText} className="save-icon" />
       </div>
     </div>
   );
